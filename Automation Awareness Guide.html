@@ -1,0 +1,681 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Automation Awareness & Reference Guide</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            overflow-x: hidden;
+            color: #fff;
+            position: relative;
+            min-height: 100vh;
+        }
+
+        .animated-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: -1;
+            background: radial-gradient(ellipse at bottom right, #1e3a8a 0%, #0c1e47 50%, #020617 100%);
+            overflow: hidden;
+        }
+
+        .bubble {
+            position: absolute;
+            left: 2%;
+            bottom: -50px;
+            background: radial-gradient(circle at 30% 30%, var(--bubble-color-light), var(--bubble-color-dark));
+            border-radius: 50%;
+            opacity: 0;
+            animation: riseAndBurst linear forwards;
+            box-shadow: inset 0 0 15px rgba(255, 255, 255, 0.6),
+                        0 0 20px var(--bubble-glow),
+                        inset -5px -5px 10px rgba(255, 255, 255, 0.3);
+            filter: blur(0.5px);
+        }
+
+        .bubble::before {
+            content: '';
+            position: absolute;
+            top: 15%;
+            left: 20%;
+            width: 35%;
+            height: 35%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.9), transparent);
+            border-radius: 50%;
+            filter: blur(1px);
+        }
+
+        .bubble::after {
+            content: '';
+            position: absolute;
+            top: 60%;
+            left: 60%;
+            width: 20%;
+            height: 20%;
+            background: radial-gradient(circle, rgba(255, 255, 255, 0.6), transparent);
+            border-radius: 50%;
+        }
+
+        @keyframes riseAndBurst {
+            0% {
+                bottom: -50px;
+                opacity: 0;
+                transform: translateX(0) scale(1);
+            }
+            5% {
+                opacity: 0.9;
+            }
+            var(--burst-time) {
+                opacity: 1;
+                transform: translateX(var(--drift)) scale(1);
+            }
+            calc(var(--burst-time) + 2%) {
+                opacity: 1;
+                transform: translateX(var(--drift)) scale(3.5);
+                box-shadow: 0 0 60px var(--bubble-glow),
+                           0 0 100px var(--bubble-glow),
+                           inset 0 0 40px rgba(255, 255, 255, 0.9);
+            }
+            calc(var(--burst-time) + 4%) {
+                opacity: 0;
+                transform: translateX(var(--drift)) scale(5);
+            }
+            100% {
+                bottom: 110vh;
+                opacity: 0;
+                transform: translateX(var(--drift)) scale(0);
+            }
+        }
+
+        .particle {
+            position: absolute;
+            width: 5px;
+            height: 5px;
+            background: var(--particle-color);
+            border-radius: 50%;
+            opacity: 0;
+            animation: explode 0.8s ease-out forwards;
+            box-shadow: 0 0 15px var(--particle-color),
+                       0 0 30px var(--particle-color);
+        }
+
+        @keyframes explode {
+            0% {
+                opacity: 1;
+                transform: translate(0, 0) scale(1.5);
+            }
+            100% {
+                opacity: 0;
+                transform: translate(var(--particle-x), var(--particle-y)) scale(0);
+            }
+        }
+
+
+
+        .glass-container {
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(10px);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            padding: 40px;
+            margin: 20px;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+            transition: transform 0.3s ease;
+        }
+
+        .glass-container:hover {
+            transform: translateY(-5px);
+        }
+
+        header {
+            text-align: center;
+            padding: 60px 20px 40px;
+        }
+
+        h1 {
+            font-size: 3.5em;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            animation: fadeInDown 1s ease;
+        }
+
+        .subtitle {
+            font-size: 1.3em;
+            opacity: 0.9;
+            animation: fadeInUp 1s ease;
+        }
+
+        .content-wrapper {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .section {
+            margin-bottom: 40px;
+            animation: fadeIn 1s ease;
+        }
+
+        h2 {
+            font-size: 2em;
+            margin-bottom: 20px;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.3);
+        }
+
+        h3 {
+            font-size: 1.5em;
+            margin: 20px 0 10px;
+            opacity: 0.95;
+        }
+
+        p, li {
+            font-size: 1.1em;
+            line-height: 1.8;
+            margin-bottom: 15px;
+            opacity: 0.9;
+        }
+
+        .benefits-grid, .methods-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .benefit-card, .method-card {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 25px;
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: all 0.3s ease;
+        }
+
+        .benefit-card:hover, .method-card:hover {
+            background: rgba(255, 255, 255, 0.25);
+            transform: scale(1.05);
+        }
+
+        .checklist {
+            list-style: none;
+            padding: 0;
+        }
+
+        .checklist li {
+            background: rgba(255, 255, 255, 0.1);
+            margin: 10px 0;
+            padding: 15px 20px 15px 50px;
+            border-radius: 10px;
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .checklist li:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(10px);
+        }
+
+        .checklist li::before {
+            content: "✓";
+            position: absolute;
+            left: 20px;
+            font-size: 1.5em;
+            color: #4ade80;
+        }
+
+        .example-box {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 4px solid #4ade80;
+            margin: 20px 0;
+        }
+
+        .framework-box {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px;
+            border-radius: 15px;
+            margin: 20px 0;
+        }
+
+        .framework-item {
+            margin: 15px 0;
+            padding-left: 20px;
+            border-left: 3px solid rgba(255, 255, 255, 0.5);
+        }
+
+        .use-case-category {
+            background: rgba(255, 255, 255, 0.12);
+            padding: 20px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        .questions-list {
+            background: rgba(255, 255, 255, 0.08);
+            padding: 25px;
+            border-radius: 12px;
+            margin: 20px 0;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateY(-30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .takeaway-box {
+            background: rgba(255, 255, 255, 0.15);
+            padding: 30px;
+            border-radius: 15px;
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            text-align: center;
+            font-size: 1.2em;
+        }
+
+        .scroll-indicator {
+            position: fixed;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            animation: bounce 2s infinite;
+            opacity: 0.7;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateX(-50%) translateY(0); }
+            40% { transform: translateX(-50%) translateY(-20px); }
+            60% { transform: translateX(-50%) translateY(-10px); }
+        }
+
+        .index-menu {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.15);
+            backdrop-filter: blur(10px);
+            border-radius: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            padding: 20px;
+            max-width: 300px;
+            max-height: 80vh;
+            overflow-y: auto;
+            z-index: 1000;
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+
+        .index-menu h3 {
+            font-size: 1.2em;
+            margin-bottom: 15px;
+            text-align: center;
+            border-bottom: 2px solid rgba(255, 255, 255, 0.3);
+            padding-bottom: 10px;
+        }
+
+        .index-menu ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .index-menu li {
+            margin: 8px 0;
+        }
+
+        .index-menu a {
+            color: #fff;
+            text-decoration: none;
+            display: block;
+            padding: 8px 12px;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            font-size: 0.95em;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .index-menu a:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateX(5px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.3);
+        }
+
+        .index-menu::-webkit-scrollbar {
+            width: 6px;
+        }
+
+        .index-menu::-webkit-scrollbar-track {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 10px;
+        }
+
+        .index-menu::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 10px;
+        }
+
+        .index-menu::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        @media (max-width: 768px) {
+            .index-menu {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="animated-bg" id="bubbleContainer"></div>
+    
+    <!-- Index Menu -->
+    <nav class="index-menu">
+        <h3>📋 Index</h3>
+        <ul>
+            <li><a href="#section1">1. What is Automation?</a></li>
+            <li><a href="#section2">2. Identify Opportunities</a></li>
+            <li><a href="#section3">3. Simplify Process Steps</a></li>
+            <li><a href="#section4">4. Reduce Work Hours</a></li>
+            <li><a href="#section5">5. Simplify Workflow Tasks</a></li>
+            <li><a href="#section6">6. Realize Manual Tasks</a></li>
+            <li><a href="#section7">7. Use Cases in Healthcare RCM</a></li>
+            <li><a href="#section8">8. Propose Automation Solutions</a></li>
+            <li><a href="#section9">9. Visual Checklist</a></li>
+            <li><a href="#section10">10. Key Takeaways</a></li>
+        </ul>
+    </nav>
+    
+    <header>
+        <h1>🤖 Automation Awareness & Reference Guide</h1>
+        <p class="subtitle">How to Identify, Define, and Propose Automation Opportunities in Product & Workflow Processes</p>
+    </header>
+
+    <div class="content-wrapper">
+        <div class="glass-container section" id="section1">
+            <h2>1. What is Automation?</h2>
+            <p>Automation refers to the use of technology (software, scripts, AI, or integrated tools) to perform repetitive or rule-based tasks with minimal or no human intervention.</p>
+            <p><strong>Product Automation →</strong> Enhancing a product (e.g., EHR, billing platform) with built-in intelligence to reduce manual steps.</p>
+            <p><strong>Workflow Automation →</strong> Streamlining operational tasks (e.g., claim submissions, AR follow-ups) to reduce time, effort, and errors.</p>
+            
+            <h3>Key Benefits</h3>
+            <div class="benefits-grid">
+                <div class="benefit-card">⚡ Reduces manual effort & errors</div>
+                <div class="benefit-card">⏱️ Saves time → improved turnaround</div>
+                <div class="benefit-card">📈 Enhances productivity & employee focus</div>
+                <div class="benefit-card">🎯 Improves data accuracy</div>
+                <div class="benefit-card">📊 Enables scalability</div>
+            </div>
+        </div>
+
+        <div class="glass-container section" id="section2">
+            <h2>2. How to Identify Automation Opportunities</h2>
+            <p>Look for patterns in day-to-day tasks. Opportunities usually exist where:</p>
+            <ul class="checklist">
+                <li>A task is repetitive (done the same way multiple times)</li>
+                <li>A task is time-consuming with little value-add</li>
+                <li>A task requires data entry, extraction, or movement between systems</li>
+                <li>A process involves rule-based decision-making (Yes/No, If/Then)</li>
+                <li>A task creates bottlenecks or delays in turnaround time</li>
+                <li>Errors are common due to manual intervention</li>
+            </ul>
+            <div class="example-box">
+                <strong>💡 Example:</strong> Checking claim status manually on payer portals repeatedly → Can be automated with API integrations.
+            </div>
+        </div>
+
+        <div class="glass-container section" id="section3">
+            <h2>3. Steps in Any Process That Can Be Simplified</h2>
+            <div class="methods-grid">
+                <div class="method-card">
+                    <strong>📝 Data Collection/Input</strong>
+                    <p>Can forms auto-populate from existing systems?</p>
+                </div>
+                <div class="method-card">
+                    <strong>✅ Validation & Verification</strong>
+                    <p>Can rules be applied to flag issues before submission?</p>
+                </div>
+                <div class="method-card">
+                    <strong>🔄 Task Routing</strong>
+                    <p>Can assignments be auto-distributed to correct teams?</p>
+                </div>
+                <div class="method-card">
+                    <strong>🔔 Notifications/Alerts</strong>
+                    <p>Can systems auto-trigger reminders, escalations?</p>
+                </div>
+                <div class="method-card">
+                    <strong>📊 Documentation/Reporting</strong>
+                    <p>Can reports auto-generate instead of manual compilation?</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="glass-container section" id="section4">
+            <h2>4. Methods to Reduce Work Hours with Automation</h2>
+            <div class="methods-grid">
+                <div class="method-card">📄 Template Creation</div>
+                <div class="method-card">⚙️ Rule-based Engines</div>
+                <div class="method-card">🔗 APIs & Integrations</div>
+                <div class="method-card">🤖 Bots / RPA</div>
+                <div class="method-card">🔍 Auto-Reconciliation</div>
+                <div class="method-card">📊 Self-service Dashboards</div>
+            </div>
+        </div>
+
+        <div class="glass-container section" id="section5">
+            <h2>5. Methods to Simplify Workflow Tasks</h2>
+            <div class="framework-box">
+                <div class="framework-item"><strong>Workflow Mapping:</strong> Break the task into steps → Identify redundant/movable steps</div>
+                <div class="framework-item"><strong>Decision Automation:</strong> If outcome depends on rules → Apply logic automation</div>
+                <div class="framework-item"><strong>Batch Processing:</strong> Instead of one-by-one, group tasks for bulk automation</div>
+                <div class="framework-item"><strong>Prioritization Engines:</strong> Automatically flag high-value claims/accounts first</div>
+                <div class="framework-item"><strong>Event Triggers:</strong> Automations should start when a condition is met</div>
+            </div>
+        </div>
+
+        <div class="glass-container section" id="section6">
+            <h2>6. How to Realize Which Manual Tasks Can Be Automated</h2>
+            <div class="questions-list">
+                <p><strong>Ask yourself:</strong></p>
+                <ul>
+                    <li>❓ Do I repeat this task every day/week?</li>
+                    <li>❓ Does this task require judgment or only rules?</li>
+                    <li>❓ Is this task prone to human error?</li>
+                    <li>❓ Is this task slowing down my turnaround time?</li>
+                    <li>❓ Can system intelligence do this faster?</li>
+                </ul>
+                <p style="margin-top: 20px;"><strong>If YES → candidate for automation</strong></p>
+            </div>
+        </div>
+
+        <div class="glass-container section" id="section7">
+            <h2>7. Real-World Automation Use Cases in Healthcare RCM</h2>
+            
+            <div class="use-case-category">
+                <h3>🏥 Product Automation</h3>
+                <ul>
+                    <li>Auto-suggest denial reason codes from EDI files</li>
+                    <li>Predictive analytics to flag claims at risk of rejection</li>
+                    <li>Auto-check eligibility before claim submission</li>
+                </ul>
+            </div>
+
+            <div class="use-case-category">
+                <h3>⚙️ Workflow Automation</h3>
+                <ul>
+                    <li>Routing claims automatically based on payer/amount</li>
+                    <li>Triggering appeal letter creation after denial</li>
+                    <li>Auto-escalating AR tasks beyond 30/60/90 days</li>
+                </ul>
+            </div>
+
+            <div class="use-case-category">
+                <h3>🚫 Managing Healthcare Denials</h3>
+                <ul>
+                    <li>Build denial library → Auto-match denial code with predefined resolution steps</li>
+                    <li>Pre-claim edits → Catch missing modifiers, eligibility, NPI errors before submission</li>
+                </ul>
+            </div>
+
+            <div class="use-case-category">
+                <h3>📋 Claim Rejection Handling</h3>
+                <ul>
+                    <li>Create auto-alerts for rejected claims</li>
+                    <li>Build scripts to resubmit corrected claims in batches</li>
+                </ul>
+            </div>
+
+            <div class="use-case-category">
+                <h3>💰 Account-Level AR Analysis</h3>
+                <ul>
+                    <li>Bots to pull account history, payer notes, and payment trail</li>
+                    <li>Auto-classification of AR accounts into buckets</li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="glass-container section" id="section8">
+            <h2>8. Framework to Define & Propose Automation Solutions</h2>
+            <div class="framework-box">
+                <div class="framework-item"><strong>Process Name:</strong> Identify the process area</div>
+                <div class="framework-item"><strong>Current Effort:</strong> Define time taken & FTEs involved</div>
+                <div class="framework-item"><strong>Pain Point:</strong> Highlight errors, delays, or manual effort</div>
+                <div class="framework-item"><strong>Proposed Automation:</strong> Define what can be automated</div>
+                <div class="framework-item"><strong>Expected Benefit:</strong> Hours saved, FTE reduction, accuracy improvement</div>
+                <div class="framework-item"><strong>Priority:</strong> High/Medium/Low (based on business impact)</div>
+            </div>
+            
+            <div class="example-box" style="margin-top: 30px;">
+                <h3>Example Proposal</h3>
+                <p><strong>Process:</strong> AR Analyst – Claim Status Check</p>
+                <p><strong>Current Effort:</strong> 3 FTEs spending ~4 hrs/day on portal checks</p>
+                <p><strong>Pain Point:</strong> High manual time + delayed responses</p>
+                <p><strong>Proposed Automation:</strong> API-based claim status check → auto-update in workqueue</p>
+                <p><strong>Expected Benefit:</strong> Save 60 hrs/week, reduce delays, faster resolution</p>
+                <p><strong>Priority:</strong> High</p>
+            </div>
+        </div>
+
+        <div class="glass-container section" id="section9">
+            <h2>✅ Visual Checklist for Healthcare Automation Opportunities</h2>
+            <ul class="checklist">
+                <li>Claim Status Checks – Are staff repeatedly logging into payer portals?</li>
+                <li>Eligibility Verification – Is insurance eligibility verified manually for each patient?</li>
+                <li>Denial Management – Are denial reasons categorized and resolved manually?</li>
+                <li>Appeal Letter Creation – Do analysts draft similar appeal letters repeatedly?</li>
+                <li>Payment Posting & Reconciliation – Is payment matching done manually?</li>
+                <li>AR Follow-ups – Are account follow-ups prioritized by humans?</li>
+                <li>Claim Resubmissions – Are rejected claims reprocessed one-by-one?</li>
+                <li>Reporting/MIS – Are reports created by pulling data manually?</li>
+            </ul>
+        </div>
+
+        <div class="glass-container section" id="section10">
+            <h2>9. Key Takeaways</h2>
+            <div class="takeaway-box">
+                <p>✨ Automation = efficiency + accuracy + reduced cost</p>
+                <p>🔍 Look for repetitive, rule-based, error-prone tasks</p>
+                <p>📐 Use workflow mapping to simplify → then apply automation</p>
+                <p>💡 Always propose automation with clear context & expected benefits</p>
+                <p>🏥 Automation in RCM drives faster collections, fewer denials, and better client outcomes</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="scroll-indicator">
+        <div style="font-size: 2em;">⬇️</div>
+    </div>
+
+    <script>
+        const container = document.getElementById('bubbleContainer');
+        
+        function createBubble() {
+            const bubble = document.createElement('div');
+            bubble.className = 'bubble';
+            
+            const colors = [
+                { light: 'rgba(147, 197, 253, 0.85)', dark: 'rgba(59, 130, 246, 0.5)', glow: 'rgba(59, 130, 246, 0.6)' },
+                { light: 'rgba(196, 181, 253, 0.85)', dark: 'rgba(139, 92, 246, 0.5)', glow: 'rgba(139, 92, 246, 0.6)' },
+                { light: 'rgba(254, 202, 202, 0.85)', dark: 'rgba(239, 68, 68, 0.5)', glow: 'rgba(239, 68, 68, 0.6)' },
+                { light: 'rgba(167, 243, 208, 0.85)', dark: 'rgba(16, 185, 129, 0.5)', glow: 'rgba(16, 185, 129, 0.6)' },
+                { light: 'rgba(253, 230, 138, 0.85)', dark: 'rgba(245, 158, 11, 0.5)', glow: 'rgba(245, 158, 11, 0.6)' },
+                { light: 'rgba(251, 207, 232, 0.85)', dark: 'rgba(236, 72, 153, 0.5)', glow: 'rgba(236, 72, 153, 0.6)' },
+                { light: 'rgba(165, 243, 252, 0.85)', dark: 'rgba(6, 182, 212, 0.5)', glow: 'rgba(6, 182, 212, 0.6)' }
+            ];
+            
+            const colorScheme = colors[Math.floor(Math.random() * colors.length)];
+            
+            const size = Math.random() * 35 + 25;
+            const duration = Math.random() * 4 + 3;
+            const drift = (Math.random() - 0.5) * 30;
+            const burstTime = (Math.random() * 50 + 25) + '%';
+            
+            bubble.style.width = size + 'px';
+            bubble.style.height = size + 'px';
+            bubble.style.animationDuration = duration + 's';
+            bubble.style.setProperty('--drift', drift + 'px');
+            bubble.style.setProperty('--burst-time', burstTime);
+            bubble.style.setProperty('--bubble-color-light', colorScheme.light);
+            bubble.style.setProperty('--bubble-color-dark', colorScheme.dark);
+            bubble.style.setProperty('--bubble-glow', colorScheme.glow);
+            
+            container.appendChild(bubble);
+            
+            const burstTimeMs = duration * 1000 * (parseFloat(burstTime) / 100);
+            setTimeout(() => createBurstParticles(bubble, colorScheme.glow), burstTimeMs);
+            
+            setTimeout(() => {
+                bubble.remove();
+            }, duration * 1000);
+        }
+
+        function createBurstParticles(bubble, color) {
+            const rect = bubble.getBoundingClientRect();
+            const particleCount = 16;
+            
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.className = 'particle';
+                
+                const angle = (i / particleCount) * Math.PI * 2;
+                const distance = Math.random() * 80 + 50;
+                const x = Math.cos(angle) * distance;
+                const y = Math.sin(angle) * distance;
+                
+                particle.style.left = rect.left + rect.width / 2 + 'px';
+                particle.style.top = rect.top + rect.height / 2 + 'px';
+                particle.style.setProperty('--particle-x', x + 'px');
+                particle.style.setProperty('--particle-y', y + 'px');
+                particle.style.setProperty('--particle-color', color);
+                
+                document.body.appendChild(particle);
+                
+                setTimeout(() => particle.remove(), 800);
+            }
+        }
+        
+        setInterval(createBubble, 300);
+        
+        for (let i = 0; i < 25; i++) {
+            setTimeout(createBubble, i * 150);
+        }
+    </script>
+</body>
+</html>
